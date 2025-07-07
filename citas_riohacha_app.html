@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citas Riohacha - El Placer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="hearts" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><text x="10" y="15" text-anchor="middle" fill="rgba(255,255,255,0.1)" font-size="12">💕</text></pattern></defs><rect width="100" height="100" fill="url(%23hearts)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .welcome-screen p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .location-warning {
+            background: #ffeb3b;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .profile-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-like {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            flex: 1;
+        }
+
+        .btn-pass {
+            background: linear-gradient(135deg, #666, #999);
+            flex: 1;
+        }
+
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .match-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            margin: 0 auto 10px;
+        }
+
+        .chat-container {
+            height: 400px;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.received {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #ff6b6b;
+        }
+
+        .nav-item span {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .nav-item small {
+            font-size: 0.7rem;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 15px;
+                padding-bottom: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💕 Citas Riohacha</h1>
+            <p>El Placer de Conocer Gente Nueva</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Pantalla de Bienvenida -->
+            <div class="screen active" id="welcome-screen">
+                <div class="welcome-screen">
+                    <h2>¡Bienvenido a Citas Riohacha!</h2>
+                    <p>La aplicación de citas exclusiva para la gente de Riohacha, La Guajira. Conoce personas increíbles cerca de ti.</p>
+                    <button class="btn" onclick="showScreen('login-screen')">Iniciar Sesión</button>
+                    <button class="btn" onclick="showScreen('register-screen')">Registrarse</button>
+                </div>
+            </div>
+
+            <!-- Pantalla de Registro -->
+            <div class="screen" id="register-screen">
+                <h2>Crear Cuenta</h2>
+                <div class="location-warning">
+                    ⚠️ Solo para residentes de Riohacha, La Guajira
+                </div>
+                <div id="register-error" class="error-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    <input type="text" id="reg-name" placeholder="Tu nombre completo">
+                </div>
+                <div class="form-group">
+                    <label>Edad</label>
+                    <input type="number" id="reg-age" min="18" max="80" placeholder="Tu edad">
+                </div>
+                <div class="form-group">
+                    <label>Género</label>
+                    <select id="reg-gender">
+                        <option value="">Selecciona tu género</option>
+                        <option value="hombre">Hombre</option>
+                        <option value="mujer">Mujer</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Barrio en Riohacha</label>
+                    <select id="reg-neighborhood">
+                        <option value="">Selecciona tu barrio</option>
+                        <option value="centro">Centro</option>
+                        <option value="el-prado">El Prado</option>
+                        <option value="la-loma">La Loma</option>
+                        <option value="el-paraiso">El Paraíso</option>
+                        <option value="las-flores">Las Flores</option>
+                        <option value="simon-bolivar">Simón Bolívar</option>
+                        <option value="maria-eugenia">María Eugenia</option>
+                        <option value="minuto-de-dios">Minuto de Dios</option>
+                        <option value="la-victoria">La Victoria</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="reg-phone" placeholder="Tu número de teléfono">
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="reg-description" placeholder="Cuéntanos sobre ti..." rows="3"></textarea>
+                </div>
+                <button class="btn" onclick="registerUser()">Registrarse</button>
+                <button class="btn" style="background: #666;" onclick="showScreen('welcome-screen')">Volver</button>
+            </div>
+
+            <!-- Pantalla de Login -->
+            <div class="screen" id="login-screen">
+                <h2>Iniciar Sesión</h2>
+                <div id="login-error" class="error-message" style="display: none;"></div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="login-name" placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="login-phone" placeholder="Tu número de teléfono">
+                </div>
+                <button class="btn" onclick="loginUser()">Iniciar Sesión</button>
+                <button class="btn" style="background: #666;" onclick="showScreen('welcome-screen')">Volver</button>
+            </div>
+
+            <!-- Pantalla Principal de Perfiles -->
+            <div class="screen" id="profiles-screen">
+                <h2>Descubre Personas</h2>
+                <div id="profiles-container"></div>
+            </div>
+
+            <!-- Pantalla de Matches -->
+            <div class="screen" id="matches-screen">
+                <h2>Tus Matches</h2>
+                <div class="matches-grid" id="matches-container"></div>
+            </div>
+
+            <!-- Pantalla de Chat -->
+            <div class="screen" id="chat-screen">
+                <div class="chat-container">
+                    <div class="chat-header" id="chat-header">Chat con usuario</div>
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Escribe un mensaje...">
+                        <button onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+                <button class="btn" style="background: #666; margin-top: 10px;" onclick="showScreen('matches-screen')">Volver a Matches</button>
+            </div>
+        </div>
+
+        <!-- Navegación inferior -->
+        <div class="bottom-nav" id="bottom-nav" style="display: none;">
+            <div class="nav-item active" onclick="showScreen('profiles-screen')">
+                <span>💕</span>
+                <small>Descubrir</small>
+            </div>
+            <div class="nav-item" onclick="showScreen('matches-screen')">
+                <span>💬</span>
+                <small>Matches</small>
+            </div>
+            <div class="nav-item" onclick="showProfile()">
+                <span>👤</span>
+                <small>Perfil</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de la aplicación
+        let currentUser = null;
+        let profiles = [];
+        let matches = [];
+        let chatMessages = {};
+        let currentChatUser = null;
+
+        // Usuarios de ejemplo
+        const sampleProfiles = [
+            {
+                id: 1,
+                name: "María González",
+                age: 25,
+                gender: "mujer",
+                neighborhood: "Centro",
+                description: "Me encanta la playa y los atardeceres de Riohacha. Busco alguien con quien compartir aventuras.",
+                phone: "3001234567"
+            },
+            {
+                id: 2,
+                name: "Carlos Pérez",
+                age: 28,
+                gender: "hombre",
+                neighborhood: "El Prado",
+                description: "Amante de la música vallenata y la comida wayuu. Siempre con buena energía.",
+                phone: "3007654321"
+            },
+            {
+                id: 3,
+                name: "Ana Rodríguez",
+                age: 23,
+                gender: "mujer",
+                neighborhood: "Las Flores",
+                description: "Estudiante de enfermería, me gusta ayudar a otros y disfrutar de la vida.",
+                phone: "3009876543"
+            },
+            {
+                id: 4,
+                name: "Luis Martínez",
+                age: 30,
+                gender: "hombre",
+                neighborhood: "La Victoria",
+                description: "Trabajador del puerto, buscando una conexión real. Me gusta el fútbol y la familia.",
+                phone: "3005555555"
+            }
+        ];
+
+        // Inicializar la aplicación
+        function initApp() {
+            profiles = [...sampleProfiles];
+            loadProfiles();
+        }
+
+        // Mostrar pantalla
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            
+            // Actualizar navegación
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            if (screenId === 'profiles-screen') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (screenId === 'matches-screen') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+            }
+        }
+
+        // Registrar usuario
+        function registerUser() {
+            const name = document.getElementById('reg-name').value.trim();
+            const age = document.getElementById('reg-age').value;
+            const gender = document.getElementById('reg-gender').value;
+            const neighborhood = document.getElementById('reg-neighborhood').value;
+            const phone = document.getElementById('reg-phone').value.trim();
+            const description = document.getElementById('reg-description').value.trim();
+
+            const errorDiv = document.getElementById('register-error');
+            
+            if (!name || !age || !gender || !neighborhood || !phone || !description) {
+                errorDiv.textContent = 'Por favor completa todos los campos';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (age < 18) {
+                errorDiv.textContent = 'Debes ser mayor de 18 años';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            currentUser = {
+                id: Date.now(),
+                name,
+                age: parseInt(age),
+                gender,
+                neighborhood,
+                phone,
+                description
+            };
+
+            errorDiv.style.display = 'none';
+            showMainApp();
+        }
+
+        // Iniciar sesión
+        function loginUser() {
+            const name = document.getElementById('login-name').value.trim();
+            const phone = document.getElementById('login-phone').value.trim();
+
+            const errorDiv = document.getElementById('login-error');
+            
+            if (!name || !phone) {
+                errorDiv.textContent = 'Por favor completa todos los campos';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Simular usuario existente
+            currentUser = {
+                id: Date.now(),
+                name,
+                phone,
+                age: 25,
+                gender: 'hombre',
+                neighborhood: 'Centro',
+                description: 'Usuario de Riohacha'
+            };
+
+            errorDiv.style.display = 'none';
+            showMainApp();
+        }
+
+        // Mostrar aplicación principal
+        function showMainApp() {
+            document.getElementById('bottom-nav').style.display = 'flex';
+            showScreen('profiles-screen');
+            loadProfiles();
+        }
+
+        // Cargar perfiles
+        function loadProfiles() {
+            const container = document.getElementById('profiles-container');
+            container.innerHTML = '';
+
+            const availableProfiles = profiles.filter(profile => 
+                !matches.some(match => match.id === profile.id)
+            );
+
+            if (availableProfiles.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No hay más perfiles disponibles por ahora.</p>';
+                return;
+            }
+
+            const profile = availableProfiles[0];
+            const profileCard = document.createElement('div');
+            profileCard.className = 'profile-card';
+            profileCard.innerHTML = `
+                <div class="profile-header">
+                    <div class="profile-avatar">${profile.name.charAt(0)}</div>
+                    <div class="profile-info">
+                        <h3>${profile.name}, ${profile.age}</h3>
+                        <p>📍 ${profile.neighborhood}</p>
+                    </div>
+                </div>
+                <p>${profile.description}</p>
+                <div class="profile-actions">
+                    <button class="btn btn-pass" onclick="passProfile(${profile.id})">❌ Pasar</button>
+                    <button class="btn btn-like" onclick="likeProfile(${profile.id})">💕 Me gusta</button>
+                </div>
+            `;
+            container.appendChild(profileCard);
+        }
+
+        // Dar like a perfil
+        function likeProfile(profileId) {
+            const profile = profiles.find(p => p.id === profileId);
+            if (profile) {
+                matches.push(profile);
+                // Simular mensajes iniciales
+                chatMessages[profileId] = [
+                    { sender: 'received', text: '¡Hola! Me alegra que hayamos hecho match 😊', time: new Date() }
+                ];
+                alert('¡Es un match! 🎉');
+            }
+            loadProfiles();
+        }
+
+        // Pasar perfil
+        function passProfile(profileId) {
+            profiles = profiles.filter(p => p.id !== profileId);
+            loadProfiles();
+        }
+
+        // Mostrar matches
+        function showMatches() {
+            const container = document.getElementById('matches-container');
+            container.innerHTML = '';
+
+            if (matches.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1 / -1;">Aún no tienes matches.</p>';
+                return;
+            }
+
+            matches.forEach(match => {
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+                matchCard.innerHTML = `
+                    <div class="match-avatar">${match.name.charAt(0)}</div>
+                    <h4>${match.name}</h4>
+                    <p>${match.age} años</p>
+                `;
+                matchCard.onclick = () => openChat(match);
+                container.appendChild(matchCard);
+            });
+        }
+
+        // Abrir chat
+        function openChat(user) {
+            currentChatUser = user;
+            document.getElementById('chat-header').textContent = `Chat con ${user.name}`;
+            loadChatMessages();
+            showScreen('chat-screen');
+        }
+
+        // Cargar mensajes del chat
+        function loadChatMessages() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+
+            const messages = chatMessages[currentChatUser.id] || [];
+            messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.sender}`;
+                messageDiv.textContent = message.text;
+                container.appendChild(messageDiv);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Enviar mensaje
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+
+            if (!text || !currentChatUser) return;
+
+            if (!chatMessages[currentChatUser.id]) {
+                chatMessages[currentChatUser.id] = [];
+            }
+
+            chatMessages[currentChatUser.id].push({
+                sender: 'sent',
+                text: text,
+                time: new Date()
+            });
+
+            input.value = '';
+            loadChatMessages();
+
+            // Simular respuesta automática
+            setTimeout(() => {
+                const responses = [
+                    "¡Qué interesante! 😄",
+                    "Me parece genial",
+                    "¿En serio? Cuéntame más",
+                    "Jajaja, me haces reír 😂",
+                    "¡Qué buena idea!",
+                    "Me gusta tu forma de pensar"
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                chatMessages[currentChatUser.id].push({
+                    sender: 'received',
+                    text: randomResponse,
+                    time: new Date()
+                });
+                loadChatMessages();
+            }, 1000 + Math.random() * 2000);
+        }
+
+        // Mostrar perfil
+        function showProfile() {
+            if (!currentUser) return;
+            
+            alert(`Perfil de ${currentUser.name}\nEdad: ${currentUser.age}\nBarrio: ${currentUser.neighborhood}\nDescripción: ${currentUser.description}`);
+        }
+
+        // Manejar Enter en input del chat
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('message-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+
+        // Actualizar matches cuando se cambie a esa pantalla
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const matchesScreen = document.getElementById('matches-screen');
+                        if (matchesScreen.classList.contains('active')) {
+                            showMatches();
+                        }
+                    }
+                });
+            });
+
+            observer.observe(document.getElementById('matches-screen'), {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+
+        // Inicializar la aplicación
+        initApp();
+    </script>
+</body>
+</html>
